@@ -1,5 +1,5 @@
 // PDF parsing utility
-import PDFParse from 'pdf-parse';
+import PDFParse from 'pdf-parse-debugging-disabled';
 
 export async function parsePDF(buffer: Buffer): Promise<{ text: string }> {
   try {
