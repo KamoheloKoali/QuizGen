@@ -57,7 +57,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen p-4">
       <div className="max-w-4xl mx-auto pt-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -107,7 +107,7 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <div className="mt-12 grid md:grid-cols-3 gap-6">
+        {/* <div className="mt-12 grid md:grid-cols-3 gap-6">
           <Card className="text-center">
             <CardContent className="pt-6">
               <Upload className="h-8 w-8 mx-auto text-blue-500 mb-3" />
@@ -137,7 +137,7 @@ export default function Home() {
               </p>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
       </div>
     </div>
   );
