@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Upload {
+  id            String   @id @default(cuid())
+  filename      String
+  originalName  String
+  fileSize      Int
+  mimeType      String
+  extractedText String?
+  uploadPath    String?
+  createdAt     DateTime @default(now())
+  quizzes       Quiz[]
+}
+
+model Quiz {
+  id             String     @id @default(cuid())
+  title          String
+  uploadId       String
+  upload         Upload     @relation(fields: [uploadId], references: [id])
+  totalQuestions Int        @default(5)
+  createdAt      DateTime   @default(now())
+  questions      Question[]
+  attempts       QuizAttempt[]
+}
+
+model Question {
+  id           String   @id @default(cuid())
+  quizId       String
+  quiz         Quiz     @relation(fields: [quizId], references: [id])
+  questionText String
+  options      String[] // Array of options
+  correctAnswer Int
+  explanation  String
+  diveDeeper   String
+  questionOrder Int
+}
+
+model QuizAttempt {
+  id          String   @id @default(cuid())
+  quizId      String
+  quiz        Quiz     @relation(fields: [quizId], references: [id])
+  answers     Json     // Store answers as JSON
+  score       Int
+  completedAt DateTime @default(now())
+}
