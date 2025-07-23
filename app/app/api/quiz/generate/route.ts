@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,26 +12,32 @@ export async function POST(request: NextRequest) {
     });
 
     if (!upload || !upload.extractedText) {
-      return NextResponse.json({ success: false, error: 'Upload not found' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: "Upload not found" },
+        { status: 404 }
+      );
     }
 
     // Initialize Gemini AI
-    const genAI = new GoogleGenerativeAI("AIzaSyBkWLscQbQbibAkjEYTGrV0JWPEtODyzXM");
+    const genAI = new GoogleGenerativeAI(
+      "AIzaSyBkWLscQbQbibAkjEYTGrV0JWPEtODyzXM"
+    );
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // Create prompt for quiz generation
     const prompt = `
-You are an expert quiz generator. Based on the following document content, create exactly 5 multiple-choice questions.
+You are an expert quiz generator. Based on the following document content(will be referred as notes from here on), create exactly 5 multiple-choice questions.
 
-Document Content:
+Notes Content:
 ${upload.extractedText.substring(0, 4000)}
 
 Requirements:
-1. Generate 5 diverse questions covering different aspects of the document
+1. Generate 5 diverse questions covering different aspects of the Notes
 2. Each question should have 4 options (A, B, C, D)
 3. Provide the correct answer index (0-3, where 0=A, 1=B, 2=C, 3=D)
 4. Include a brief explanation for the correct answer
 5. Provide an extended "dive deeper" explanation with additional context
+6. DO NOT include Table of contents or any introductory text in the questions
 
 Return ONLY a valid JSON object in this exact format:
 {
@@ -56,12 +62,12 @@ Make sure the JSON is valid and properly formatted. Do not include any other tex
 
     // Clean up the response to extract JSON
     let jsonText = text.trim();
-    
+
     // Remove markdown code blocks if present
-    if (jsonText.startsWith('```json')) {
-      jsonText = jsonText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    } else if (jsonText.startsWith('```')) {
-      jsonText = jsonText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    if (jsonText.startsWith("```json")) {
+      jsonText = jsonText.replace(/^```json\s*/, "").replace(/\s*```$/, "");
+    } else if (jsonText.startsWith("```")) {
+      jsonText = jsonText.replace(/^```\s*/, "").replace(/\s*```$/, "");
     }
 
     // Parse the JSON response
@@ -69,14 +75,18 @@ Make sure the JSON is valid and properly formatted. Do not include any other tex
     try {
       aiResponse = JSON.parse(jsonText);
     } catch (parseError) {
-      console.error('JSON parsing error:', parseError);
-      console.error('Raw response:', text);
-      throw new Error('Invalid JSON response from AI');
+      console.error("JSON parsing error:", parseError);
+      console.error("Raw response:", text);
+      throw new Error("Invalid JSON response from AI");
     }
 
     // Validate the response structure
-    if (!aiResponse.questions || !Array.isArray(aiResponse.questions) || aiResponse.questions.length === 0) {
-      throw new Error('Invalid quiz format from AI');
+    if (
+      !aiResponse.questions ||
+      !Array.isArray(aiResponse.questions) ||
+      aiResponse.questions.length === 0
+    ) {
+      throw new Error("Invalid quiz format from AI");
     }
 
     // Create quiz in database
@@ -121,10 +131,13 @@ Make sure the JSON is valid and properly formatted. Do not include any other tex
       },
     });
   } catch (error) {
-    console.error('Quiz generation error:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: 'Quiz generation failed. Please try again.' 
-    }, { status: 500 });
+    console.error("Quiz generation error:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Quiz generation failed. Please try again.",
+      },
+      { status: 500 }
+    );
   }
 }

@@ -298,10 +298,27 @@ export default function QuizPage() {
               ) : (
                 <Button
                   onClick={handleNextQuestion}
+                  disabled={isSubmitting && currentQuestionIndex === quizData.questions.length - 1}
                   className="flex items-center gap-2"
                 >
-                  {currentQuestionIndex === quizData.questions.length - 1 ? "Finish Quiz" : "Next Question"}
-                  <ArrowRight className="h-4 w-4" />
+                  {currentQuestionIndex === quizData.questions.length - 1 ? (
+                    isSubmitting ? (
+                      <>
+                        <LoadingSpinner size="sm" />
+                        Submitting Quiz...
+                      </>
+                    ) : (
+                      <>
+                        Finish Quiz
+                        <ArrowRight className="h-4 w-4" />
+                      </>
+                    )
+                  ) : (
+                    <>
+                      Next Question
+                      <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
                 </Button>
               )}
             </div>
