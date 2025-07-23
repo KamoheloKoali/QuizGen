@@ -38,7 +38,7 @@ export default function QuizPage() {
 
   if (!quizData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -160,7 +160,7 @@ export default function QuizPage() {
 
   if (quizCompleted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="min-h-screen p-4">
         <div className="max-w-4xl mx-auto pt-8">
           <Card className="mb-6">
             <CardHeader className="text-center">
@@ -253,7 +253,7 @@ export default function QuizPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen p-4">
       <div className="max-w-3xl mx-auto pt-8">
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
