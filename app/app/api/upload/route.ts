@@ -4,6 +4,8 @@ import { join } from 'path';
 import { prisma } from '@/lib/prisma';
 import { parsePDF } from '@/lib/pdf-parser';
 
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
   try {
     const data = await request.formData();
