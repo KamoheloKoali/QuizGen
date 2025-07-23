@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
-import PDFParse from 'pdf-parse';
 import { prisma } from '@/lib/prisma';
+import { parsePDF } from '@/lib/pdf-parser';
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     await writeFile(filepath, buffer);
 
     // Extract text from PDF
-    const pdfData = await PDFParse(buffer);
+    const pdfData = await parsePDF(buffer);
     const extractedText = pdfData.text;
 
     // Validate extracted text

@@ -15,6 +15,9 @@ export interface QuizData {
 export interface Answer {
   questionId: number;
   selectedAnswer: number;
+}
+
+export interface LocalAnswer extends Answer {
   isCorrect: boolean;
 }
 

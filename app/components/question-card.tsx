@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CheckCircle, XCircle } from "lucide-react";
-import { Question, Answer } from "@/lib/types";
+import { Question, LocalAnswer } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface QuestionCardProps {
@@ -12,7 +12,7 @@ interface QuestionCardProps {
   selectedAnswer?: string;
   onAnswerChange: (value: string) => void;
   showFeedback: boolean;
-  answer?: Answer;
+  answer?: LocalAnswer;
   disabled?: boolean;
 }
 

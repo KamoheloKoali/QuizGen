@@ -10,17 +10,20 @@ import { QuestionCard } from "@/components/question-card";
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { toast } from "sonner";
 import { CheckCircle, XCircle, ArrowLeft, ArrowRight, Eye, RotateCcw } from "lucide-react";
-import { Question, QuizData, Answer } from "@/lib/types";
+import { Question, QuizData, Answer, LocalAnswer } from "@/lib/types";
+import { apiClient } from "@/lib/api-client";
 
 export default function QuizPage() {
   const [quizData, setQuizData] = useState<QuizData | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
-  const [answers, setAnswers] = useState<Answer[]>([]);
+  const [answers, setAnswers] = useState<LocalAnswer[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [showDiveDeeper, setShowDiveDeeper] = useState(false);
   const [diveDeepQuestion, setDiveDeepQuestion] = useState<Question | null>(null);
+  const [quizResults, setQuizResults] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -54,7 +57,7 @@ export default function QuizPage() {
     const answerIndex = parseInt(selectedAnswer);
     const isCorrect = answerIndex === currentQuestion.correctAnswer;
     
-    const newAnswer: Answer = {
+    const newAnswer: LocalAnswer = {
       questionId: currentQuestion.id,
       selectedAnswer: answerIndex,
       isCorrect
@@ -74,13 +77,43 @@ export default function QuizPage() {
     }
   };
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = async () => {
     if (currentQuestionIndex < quizData.questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
       setSelectedAnswer("");
       setShowFeedback(false);
     } else {
+      // Submit quiz to backend
+      await submitQuizToBackend();
       setQuizCompleted(true);
+    }
+  };
+
+  const submitQuizToBackend = async () => {
+    const quizId = localStorage.getItem('currentQuizId');
+    if (!quizId || !answers.length) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Convert answers to backend format
+      const backendAnswers = answers.map(answer => ({
+        questionId: answer.questionId,
+        selectedAnswer: answer.selectedAnswer,
+      }));
+
+      const result = await apiClient.submitQuiz(quizId, backendAnswers);
+      
+      if (result.success && result.data) {
+        setQuizResults(result.data);
+        toast.success(`Quiz submitted! Score: ${result.data.score}/${result.data.totalQuestions}`);
+      }
+    } catch (error) {
+      console.error('Failed to submit quiz:', error);
+      toast.error("Failed to submit quiz to server, but you can still see your results");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -111,6 +144,8 @@ export default function QuizPage() {
     setAnswers([]);
     setShowFeedback(false);
     setQuizCompleted(false);
+    setQuizResults(null);
+    setIsSubmitting(false);
   };
 
   const goToUpload = () => {
@@ -118,8 +153,10 @@ export default function QuizPage() {
     router.push("/");
   };
 
-  const correctAnswers = answers.filter(a => a.isCorrect).length;
-  const score = Math.round((correctAnswers / quizData.questions.length) * 100);
+  const correctAnswers = quizResults?.score || answers.filter(a => a.isCorrect).length;
+  const totalQuestions = quizResults?.totalQuestions || quizData.questions.length;
+  const score = quizResults?.percentage || Math.round((correctAnswers / totalQuestions) * 100);
+  const resultMessage = quizResults?.message || "";
 
   if (quizCompleted) {
     return (
@@ -129,7 +166,8 @@ export default function QuizPage() {
             <CardHeader className="text-center">
               <CardTitle className="text-3xl text-green-600">Quiz Completed!</CardTitle>
               <CardDescription className="text-xl">
-                Your Score: {correctAnswers}/{quizData.questions.length} ({score}%)
+                Your Score: {correctAnswers}/{totalQuestions} ({score}%)
+                {resultMessage && <div className="mt-2 text-lg font-medium">{resultMessage}</div>}
               </CardDescription>
             </CardHeader>
             <CardContent>
